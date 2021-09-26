@@ -10,23 +10,23 @@ namespace InformationSecurityAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class InfoSec1 : Controller
+    public class InfoSec2 : Controller
     {
-        public InfoSec1()
+        public InfoSec2()
         {
         }
         [HttpPost]
-        public JsonResult Post(TextRequest textRequest)
+        public JsonResult Post(TextRequest2 textRequest2)
         {
-            if (textRequest.resp is null)
+            if (textRequest2.word is null)
             {
 
                 return new JsonResult("Вы не ввели слово");
             }
             else
             {
-                Shifrovanie1 shifr = new Shifrovanie1();
-                return new JsonResult(shifr.Caesar(textRequest.resp, textRequest.key, textRequest.language));
+                Shifrovanie2 shifr = new Shifrovanie2();
+                return new JsonResult(shifr.Vigener(textRequest2));
             }
         }
     }
