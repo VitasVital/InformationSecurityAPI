@@ -55,6 +55,8 @@ namespace InformationSecurityAPI.Shifrovanie
             List<char> letters_lang;
             List<int> indexes_capital_letters = new List<int>();
             string lower_word = "";
+
+            //верхний регистр в нижний
             for (int i = 0; i < textRequest2.word.Length; i++)
             {
                 if (Char.IsUpper(textRequest2.word[i]))
@@ -66,12 +68,12 @@ namespace InformationSecurityAPI.Shifrovanie
                 {
                     lower_word += textRequest2.word[i];
                 }
-                
             }
+
+            //если криптограмма, то расшифровка, иначе зашифровка
             if(textRequest2.is_cryptogram)
             {
                 letters = textRequest2.language == 2 ? letter : letter2;
-                //letters.Reverse();
                 letters_lang = textRequest2.language == 2 ? letter_rus : letter_eng;
             }
             else
@@ -79,6 +81,7 @@ namespace InformationSecurityAPI.Shifrovanie
                 letters = textRequest2.language == 2 ? letter : letter2;
                 letters_lang = textRequest2.language == 2 ? letter_rus : letter_eng;
             }
+
             for (int i = 0; i < textRequest2.key.Length; i++)
             {
                 if (!letters_lang.Contains(textRequest2.key[i]))
@@ -86,29 +89,76 @@ namespace InformationSecurityAPI.Shifrovanie
                     return "Ключ не совпадает с выбранным языком";
                 }
             }
+
+            //шифрование или расшифровка слова
             string new_word = "";
             int index_of_key = 0;
-            int is_cryptogram_umnozenie = textRequest2.is_cryptogram ? -1 : 1;
-            for (int i = 0; i < lower_word.Length; i++)
+            if (!textRequest2.is_cryptogram)
             {
-                if (!letters.Contains(lower_word[i]))
+                for (int i = 0; i < lower_word.Length; i++)
                 {
-                    return "Вы ввели что-то неправильно";
+                    if (!letters.Contains(lower_word[i]))
+                    {
+                        return "Вы ввели что-то неправильно";
+                    }
+
+                    if (letters.IndexOf(lower_word[i]) + letters_lang.IndexOf(textRequest2.key[index_of_key]) >= letters.Count)
+                    {
+                        new_word += letters[letters.IndexOf(lower_word[i]) + letters_lang.IndexOf(textRequest2.key[index_of_key]) - letters.Count];
+                    }
+                    else
+                    {
+                        new_word += letters[letters.IndexOf(lower_word[i]) + letters_lang.IndexOf(textRequest2.key[index_of_key])];
+                    }
+
+                    index_of_key += 1;
+                    if (index_of_key == textRequest2.key.Length)
+                    {
+                        index_of_key = 0;
+                    }
                 }
-                if (letters.IndexOf(lower_word[i]) + letters.IndexOf(letters_lang[index_of_key]) >= letters.Count)
+            }
+            else
+            {
+                for (int i = 0; i < lower_word.Length; i++)
                 {
-                    new_word += letters[letters.IndexOf(lower_word[i]) + letters.IndexOf(letters_lang[index_of_key]) * is_cryptogram_umnozenie - letters.Count];
+                    if (!letters.Contains(lower_word[i]))
+                    {
+                        return "Вы ввели что-то неправильно";
+                    }
+
+                    if (letters.IndexOf(lower_word[i]) - letters_lang.IndexOf(textRequest2.key[index_of_key]) < 0)
+                    {
+                        new_word += letters[letters.Count - letters_lang.IndexOf(textRequest2.key[index_of_key])];
+                    }
+                    else
+                    {
+                        new_word += letters[letters.IndexOf(lower_word[i]) - letters_lang.IndexOf(textRequest2.key[index_of_key])];
+                    }
+
+                    index_of_key += 1;
+                    if (index_of_key == textRequest2.key.Length)
+                    {
+                        index_of_key = 0;
+                    }
+                }
+            }
+
+            //перевод в верхний регистр
+            lower_word = "";
+            for (int i = 0; i < new_word.Length; i++)
+            {
+                if (indexes_capital_letters.Contains(i))
+                {
+                    lower_word += char.ToUpper(new_word[i]);
                 }
                 else
                 {
-                    new_word += letters[letters.IndexOf(lower_word[i]) + letters.IndexOf(letters_lang[index_of_key]) * is_cryptogram_umnozenie];
-                }
-                index_of_key += 1;
-                if (index_of_key == textRequest2.key.Length)
-                {
-                    index_of_key = 0;
+                    lower_word += new_word[i];
                 }
             }
+            new_word = lower_word;
+
             return new_word;
         }
     }
