@@ -104,7 +104,7 @@ namespace InformationSecurityAPI.Shifrovanie
 
                     if (letters.IndexOf(lower_word[i]) + letters_lang.IndexOf(textRequest2.key[index_of_key]) >= letters.Count)
                     {
-                        new_word += letters[letters.IndexOf(lower_word[i]) + letters_lang.IndexOf(textRequest2.key[index_of_key]) - letters.Count];
+                        new_word += letters[letters.IndexOf(lower_word[i]) + letters_lang.IndexOf(textRequest2.key[index_of_key]) - letters.Count + 1];
                     }
                     else
                     {
@@ -129,7 +129,7 @@ namespace InformationSecurityAPI.Shifrovanie
 
                     if (letters.IndexOf(lower_word[i]) - letters_lang.IndexOf(textRequest2.key[index_of_key]) < 0)
                     {
-                        new_word += letters[letters.Count - letters_lang.IndexOf(textRequest2.key[index_of_key])];
+                        new_word += letters[letters.Count - (letters_lang.IndexOf(textRequest2.key[index_of_key]) - letters.IndexOf(lower_word[i])) - 1];
                     }
                     else
                     {
