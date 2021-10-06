@@ -16,17 +16,17 @@ namespace InformationSecurityAPI.Controllers
         {
         }
         [HttpPost]
-        public JsonResult Post(TextRequest textRequest)
+        public JsonResult Post(TextRequest2 textRequest2)
         {
-            if (textRequest.resp is null)
+            if (textRequest2.word is null || textRequest2.key is null)
             {
 
-                return new JsonResult("Вы не ввели слово");
+                return new JsonResult("Вы не ввели слово или ключ");
             }
             else
             {
                 Shifrovanie1 shifr = new Shifrovanie1();
-                return new JsonResult(shifr.Caesar(textRequest.resp, textRequest.key, textRequest.language));
+                return new JsonResult(shifr.Caesar(textRequest2));
             }
         }
     }

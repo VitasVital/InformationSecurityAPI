@@ -70,8 +70,22 @@ namespace InformationSecurityAPI.Shifrovanie
                 }
             }
 
+            string lower_key = "";
+            for (int i = 0; i < textRequest2.key.Length; i++)
+            {
+                if (Char.IsUpper(textRequest2.key[i]))
+                {
+                    lower_key += char.ToLower(textRequest2.key[i]);
+                }
+                else
+                {
+                    lower_key += textRequest2.key[i];
+                }
+            }
+            textRequest2.key = lower_key;
+
             //если криптограмма, то расшифровка, иначе зашифровка
-            if(textRequest2.is_cryptogram)
+            if (textRequest2.is_cryptogram)
             {
                 letters = textRequest2.language == 2 ? letter : letter2;
                 letters_lang = textRequest2.language == 2 ? letter_rus : letter_eng;

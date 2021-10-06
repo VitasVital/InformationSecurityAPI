@@ -1,121 +1,149 @@
-﻿using System;
+﻿using InformationSecurityAPI.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace InformationSecurityAPI.Shifrovanie
 {
     public class Shifrovanie1
     {
-        List<string> letter;
-        List<string> letter1;
-        List<string> letter2;
-        List<string> letter3;
+        List<char> letter;
+        List<char> letter2;
+        List<char> letter_numbers;
         public Shifrovanie1()
         {
-            this.letter = new List<string>() 
-            { 
-                "А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", 
-                "З", "И", "Й", "К", "Л", "М", "Н", "О", 
-                "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", 
-                "Ш", "Щ", "Ъ", "Ы", "Ь", "Э", "Ю", "Я" ,
+            this.letter = new List<char>() 
+            {
+                'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж',
+                'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о',
+                'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч',
+                'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я',
 
-                "а", "б", "в", "г", "д", "е", "ё", "ж",
-                "з", "и", "й", "к", "л", "м", "н", "о",
-                "п", "р", "с", "т", "у", "ф", "х", "ц", "ч",
-                "ш", "щ", "ъ", "ы", "ь", "э", "ю", "я",
-
-                "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
             };
 
-            this.letter1 = new List<string>()
+            this.letter2 = new List<char>()
             {
-                "9" ,"8" ,"7" ,"6" ,"5" ,"4" ,"3" ,"2" ,"1" ,"0",
+                'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
+                'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
+                's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
 
-                "я" ,"ю" ,"э" ,"ь" ,"ы" ,"ъ" ,"щ" ,"ш",
-                "ч" ,"ц" ,"х" ,"ф" ,"у" ,"т" ,"с" ,"р" ,"п",
-                "о" ,"н" ,"м" ,"л" ,"к" ,"й" ,"и" ,"з",
-                "ж" ,"ё" ,"е" ,"д" ,"г" ,"в" ,"б" ,"а",
-                
-                "Я" ,"Ю" ,"Э" ,"Ь" ,"Ы" ,"Ъ" ,"Щ" ,"Ш",
-                "Ч" ,"Ц" ,"Х" ,"Ф" ,"У" ,"Т" ,"С" ,"Р" ,"П",
-                "О" ,"Н" ,"М" ,"Л" ,"К" ,"Й" ,"И" ,"З",
-                "Ж" ,"Ё" ,"Е" ,"Д" ,"Г" ,"В" ,"Б" ,"А",
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
             };
-
-            this.letter2 = new List<string>()
+            this.letter_numbers = new List<char>()
             {
-                "A", "B", "C", "D", "E", "F", "G", "H", "I",
-                "J", "K", "L", "M", "N", "O", "P", "Q", "R",
-                "S", "T", "U", "V", "W", "X", "Y", "Z",
-
-                "a", "b", "c", "d", "e", "f", "g", "h", "i",
-                "j", "k", "l", "m", "n", "o", "p", "q", "r",
-                "s", "t", "u", "v", "w", "x", "y", "z",
-
-                "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
-            };
-
-            this.letter3 = new List<string>()
-            {
-                "9" ,"8" ,"7" ,"6" ,"5" ,"4" ,"3" ,"2" ,"1" ,"0",
-
-                "z" ,"y" ,"x" ,"w" ,"v" ,"u" ,"t" ,"s"
-                ,"r" ,"q" ,"p" ,"o" ,"n" ,"m" ,"l" ,"k" ,"j"
-                ,"i" ,"h" ,"g" ,"f" ,"e" ,"d" ,"c" ,"b" ,"a",
-
-                "Z" ,"Y" ,"X" ,"W" ,"V" ,"U" ,"T" ,"S","R" ,
-                "Q" ,"P" ,"O" ,"N" ,"M" ,"L" ,"K" ,"J",
-                "I" ,"H" ,"G" ,"F" ,"E" ,"D" ,"C" ,"B" ,"A"
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
             };
         }
 
-        public string Caesar(string word, int key, int language)
+        public string Caesar(TextRequest2 textRequest2)
         {
-            List<string> letters;
-            if (key < 0)
+            List<char> letters;
+            List<int> indexes_capital_letters = new List<int>();
+            string lower_word = "";
+
+            //верхний регистр в нижний
+            for (int i = 0; i < textRequest2.word.Length; i++)
             {
-                key *= -1;
-                if (language == 2)
+                if (Char.IsUpper(textRequest2.word[i]))
                 {
-                    letters = letter1;
+                    indexes_capital_letters.Add(i);
+                    lower_word += char.ToLower(textRequest2.word[i]);
                 }
                 else
                 {
-                    letters = letter3;
+                    lower_word += textRequest2.word[i];
+                }
+            }
+
+            if (textRequest2.key[0] != '-' && !this.letter_numbers.Contains(textRequest2.key[0]))
+            {
+                return "Ключ неверный";
+            }
+
+            for (int i = 1; i < textRequest2.key.Length; i++)
+            {
+                if (!this.letter_numbers.Contains(textRequest2.key[i]))
+                {
+                    return "Ключ неверный";
+                }
+            }
+
+            //если криптограмма, то расшифровка, иначе зашифровка
+            letters = textRequest2.language == 2 ? letter : letter2;
+
+            BigInteger big_key = BigInteger.Parse(textRequest2.key);
+            big_key %= letters.Count;
+            int key = (int)big_key;
+
+
+            //шифрование или расшифровка слова
+            string new_word = "";
+            if (!textRequest2.is_cryptogram)
+            {
+                for (int i = 0; i < lower_word.Length; i++)
+                {
+                    if (!letters.Contains(lower_word[i]))
+                    {
+                        return "Вы ввели что-то неправильно";
+                    }
+
+
+                    if (letters.IndexOf(lower_word[i]) + key >= letters.Count)
+                    {
+                        new_word += letters[letters.IndexOf(lower_word[i]) + key - letters.Count + 1];
+                    }
+                    else if (letters.IndexOf(lower_word[i]) + key < 0)
+                    {
+                        new_word += letters[letters.Count - (key * (-1) - letters.IndexOf(lower_word[i])) - 1];
+                    }
+                    else
+                    {
+                        new_word += letters[letters.IndexOf(lower_word[i]) + key];
+                    }
                 }
             }
             else
             {
-                if (language == 2)
+                for (int i = 0; i < lower_word.Length; i++)
                 {
-                    letters = letter;
-                }
-                else
-                {
-                    letters = letter2;
+                    if (!letters.Contains(lower_word[i]))
+                    {
+                        return "Вы ввели что-то неправильно";
+                    }
+
+                    if (letters.IndexOf(lower_word[i]) - key >= letters.Count)
+                    {
+                        new_word += letters[letters.IndexOf(lower_word[i]) + key * (-1) - letters.Count + 1];
+                    }
+                    else if (letters.IndexOf(lower_word[i]) - key < 0)
+                    {
+                        new_word += letters[letters.Count - (key - letters.IndexOf(lower_word[i])) - 1];
+                    }
+                    else
+                    {
+                        new_word += letters[letters.IndexOf(lower_word[i]) - key];
+                    }
                 }
             }
-            key %= letters.Count;
-            string new_word = "";
-            for (int i = 0; i < word.Length; i++)
+
+            //перевод в верхний регистр
+            lower_word = "";
+            for (int i = 0; i < new_word.Length; i++)
             {
-                string let = Convert.ToString(word[i]);
-                if (!letters.Contains(let))
+                if (indexes_capital_letters.Contains(i))
                 {
-                    //new_word += let;
-                    //continue;
-                    return "Вы ввели что-то неправильно";
-                }
-                if (letters.IndexOf(let) + key >= letters.Count)
-                {
-                    new_word += letters[letters.IndexOf(let) + key - letters.Count];
+                    lower_word += char.ToUpper(new_word[i]);
                 }
                 else
                 {
-                    new_word += letters[letters.IndexOf(let) + key];
+                    lower_word += new_word[i];
                 }
             }
+            new_word = lower_word;
+
             return new_word;
         }
     }
