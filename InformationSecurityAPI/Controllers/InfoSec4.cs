@@ -33,7 +33,7 @@ namespace InformationSecurityAPI.Controllers
             }
             else if (textRequest4.number_result == 2)
             {
-                if (textRequest4.A == "" || textRequest4.B == "")
+                if (textRequest4._A == "" || textRequest4._B == "")
                 {
                     textRequest4.result_2_nod = "Что-то не заполнено";
                     return new JsonResult(textRequest4);
