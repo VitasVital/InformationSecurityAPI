@@ -18,7 +18,7 @@ namespace InformationSecurityAPI.Controllers
         [HttpPost]
         public JsonResult Post(TextRequest2 textRequest2)
         {
-            if (textRequest2.word is null || textRequest2.key is null)
+            if (textRequest2.word == "" || textRequest2.key == "")
             {
 
                 return new JsonResult("Вы не ввели слово или ключ");

@@ -10,6 +10,7 @@ namespace InformationSecurityAPI.Shifrovanie
     public class Shifrovanie3
     {
         List<char> letter;
+        Random rnd;
         public Shifrovanie3()
         {
             this.letter = new List<char>()
@@ -19,6 +20,7 @@ namespace InformationSecurityAPI.Shifrovanie
                 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч',
                 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я'
             };
+            this.rnd = new Random();
         }
 
         private string ConvertToBinaty(char letter)
@@ -58,28 +60,20 @@ namespace InformationSecurityAPI.Shifrovanie
 
         public TextRequest3 Gamming(TextRequest3 textRequest3)
         {
+            if (textRequest3.word.Length == 0)
+            {
+                textRequest3.word_binary = "Слово неверное";
+                return textRequest3;
+            }
             for (int i = 0; i < textRequest3.word.Length; i++)
             {
                 if (!this.letter.Contains(textRequest3.word[i]))
                 {
-                    textRequest3.word = "Слово неверное";
+                    textRequest3.word_binary = "Слово неверное";
                     return textRequest3;
                 }
             }
-
-            if (textRequest3.is_generated_key == false)
-            {
-                for (int i = 0; i < textRequest3.key.Length; i++)
-                {
-                    if (!this.letter.Contains(textRequest3.key[i]))
-                    {
-                        textRequest3.key = "Ключ неверный";
-                        return textRequest3;
-                    }
-                }
-            }
-
-            //перевод в двоичный вид
+            //перевод в двоичный вид исходного сообщения
             for (int i = 0; i < textRequest3.word.Length; i++)
             {
                 textRequest3.word_binary += this.ConvertToBinaty(textRequest3.word[i]);
@@ -88,6 +82,20 @@ namespace InformationSecurityAPI.Shifrovanie
 
             if (textRequest3.is_generated_key == false)
             {
+                if (textRequest3.key.Length == 0)
+                {
+                    textRequest3.key_binary = "Ключ неверный";
+                    return textRequest3;
+                }
+                for (int i = 0; i < textRequest3.key.Length; i++)
+                {
+                    if (!this.letter.Contains(textRequest3.key[i]))
+                    {
+                        textRequest3.key_binary = "Ключ неверный";
+                        return textRequest3;
+                    }
+                }
+                //перевод в двоичный вид ключа
                 for (int i = 0; i < textRequest3.key.Length; i++)
                 {
                     textRequest3.key_binary += this.ConvertToBinaty(textRequest3.key[i]);
@@ -95,7 +103,13 @@ namespace InformationSecurityAPI.Shifrovanie
             }
             else
             {
-
+                if (textRequest3.key_binary.Length == 0)
+                {
+                    for (int i = 0; i < textRequest3.word_binary.Length; i++)
+                    {
+                        textRequest3.key_binary += rnd.Next(0, 2).ToString();
+                    }
+                }
             }
 
             //шифрование или расшифровка слова
