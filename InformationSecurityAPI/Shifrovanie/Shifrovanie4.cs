@@ -29,6 +29,8 @@ namespace InformationSecurityAPI.Shifrovanie
             return binary_letter;
         }
 
+        
+
         public TextRequest4 Result_1(TextRequest4 textRequest4)
         {
             BigInteger num; //если не удалочь конвертировать, будет значение num
@@ -79,8 +81,41 @@ namespace InformationSecurityAPI.Shifrovanie
                 textRequest4.result_2_nod = "Вы ввели что-то неправильно";
                 return textRequest4;
             }
-            BigInteger _A = BigInteger.Parse(textRequest4._A);
-            BigInteger _B = BigInteger.Parse(textRequest4._B);
+            BigInteger a = BigInteger.Parse(textRequest4._A);
+            BigInteger b = BigInteger.Parse(textRequest4._B);
+
+
+
+            BigInteger p = 1, q = 0, r = 0, s = 1, x, y;
+            while (a > 0 && b > 0)
+            {
+                if (a >= b)
+                {
+                    a = a - b;
+                    p = p - r;
+                    q = q - s;
+                }
+                else
+                {
+                    b = b - a;
+                    r = r - p;
+                    s = s - q;
+                }
+            }
+            if (a > 0)
+            {
+                x = p;
+                y = q;
+                textRequest4.result_2_nod = Convert.ToString(a);
+            }
+            else
+            {
+                x = r;
+                y = s;
+                textRequest4.result_2_nod = Convert.ToString(b);
+            }
+            textRequest4.result_2_x = Convert.ToString(x);
+            textRequest4.result_2_y = Convert.ToString(y);
 
             return textRequest4;
         }
