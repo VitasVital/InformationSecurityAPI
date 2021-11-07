@@ -45,6 +45,11 @@ namespace InformationSecurityAPI.Shifrovanie
             BigInteger _a = BigInteger.Parse(textRequest4.a);
             BigInteger _alpha = BigInteger.Parse(textRequest4.alpha);
             BigInteger _n = BigInteger.Parse(textRequest4.n);
+            if (_a == 0 || _alpha == 0 || _n == 0)
+            {
+                textRequest4.result_1 = "Вы ввели что-то неправильно";
+                return textRequest4;
+            }
 
             //перевод alpha в двоичный вид
             string binary_alpha = this.ConvertToBinaty(_alpha);
@@ -83,8 +88,6 @@ namespace InformationSecurityAPI.Shifrovanie
             }
             BigInteger a = BigInteger.Parse(textRequest4._A);
             BigInteger b = BigInteger.Parse(textRequest4._B);
-
-
 
             BigInteger p = 1, q = 0, r = 0, s = 1, x, y;
             while (a > 0 && b > 0)
