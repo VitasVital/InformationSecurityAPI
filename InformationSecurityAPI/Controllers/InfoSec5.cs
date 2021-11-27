@@ -27,29 +27,20 @@ namespace InformationSecurityAPI.Controllers
                     textRequest5.SoloveyStrassen = "Заполни n";
                     return new JsonResult(textRequest5);
                 }
-                else
-                {
-                    Shifrovanie5 shifr = new Shifrovanie5();
-                    return new JsonResult(shifr.Result_1(textRequest5));
-                }
+                Shifrovanie5 shifr = new Shifrovanie5();
+                return new JsonResult(shifr.Result_1(textRequest5));
             }
-            else if (textRequest5.number_result == 2)
+            if (textRequest5.number_result == 2)
             {
                 if (textRequest5.bit_number == "")
                 {
                     textRequest5.generated_number = "Что-то не заполнено";
                     return new JsonResult(textRequest5);
                 }
-                else
-                {
-                    Shifrovanie5 shifr = new Shifrovanie5();
-                    return new JsonResult(shifr.Result_2(textRequest5));
-                }
+                Shifrovanie5 shifr = new Shifrovanie5();
+                return new JsonResult(shifr.Result_2(textRequest5));
             }
-            else
-            {
-                return new JsonResult(textRequest5);
-            }
+            return new JsonResult(textRequest5);
         }
     }
 }

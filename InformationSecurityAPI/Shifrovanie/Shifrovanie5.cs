@@ -54,12 +54,44 @@ namespace InformationSecurityAPI.Shifrovanie
             return result;
         }
 
+        public BigInteger NOD(BigInteger a, BigInteger b)
+        {
+            BigInteger p = 1, q = 0, r = 0, s = 1, x, y;
+            while (a > 0 && b > 0)
+            {
+                if (a >= b)
+                {
+                    a = a - b;
+                    p = p - r;
+                    q = q - s;
+                }
+                else
+                {
+                    b = b - a;
+                    r = r - p;
+                    s = s - q;
+                }
+            }
+            if (a > 0)
+            {
+                x = p;
+                y = q;
+                return a;
+            }
+            else
+            {
+                x = r;
+                y = s;
+                return b;
+            }
+        }
+
         private string TestMillerRabin(BigInteger _n)
         {
             int k = 5; //количество раундов
             if (_n == 2 || _n == 3)
             {
-                return "Простое";
+                return "Вероятно простое";
             }
             if (_n % 2 == 0)
             {
@@ -156,7 +188,38 @@ namespace InformationSecurityAPI.Shifrovanie
         }
         private string TestSoloveyStrassen(BigInteger _n)
         {
-            return "text";
+            int k = 5; //количество раундов
+
+            for (int i = 1; i < k; i++)
+            {
+                // выберем случайное целое число a в отрезке [2, n − 2]
+                RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+
+                byte[] _a = new byte[_n.ToByteArray().LongLength];
+
+                BigInteger a;
+
+                do
+                {
+                    rng.GetBytes(_a);
+                    a = new BigInteger(_a);
+                }
+                while (a < 2 || a >= _n - 2);
+
+                if (this.NOD(a, _n) != 1)
+                {
+                    return "Составное";
+                }
+
+                BigInteger vozvedenieStepenPoModulu = this.VozvedenieStepenPoModulu(a, (_n - 1) / 2, _n);
+
+                if (vozvedenieStepenPoModulu != 1 && vozvedenieStepenPoModulu != -1)
+                {
+                    return "Составное";
+                }
+            }
+
+            return "Вероятно простое";
         }
 
         public TextRequest5 Result_1(TextRequest5 textRequest5)
@@ -178,26 +241,76 @@ namespace InformationSecurityAPI.Shifrovanie
                 textRequest5.Farm = "Вы ввели что-то неправильно";
                 return textRequest5;
             }
-
-            switch(textRequest5.test_number_1)
-            {
-                case 1:
-                    textRequest5.MillerRabin = this.TestMillerRabin(_n);
-                    break;
-                case 2:
-                    textRequest5.SoloveyStrassen = this.TestSoloveyStrassen(_n);
-                    break;
-                case 3:
-                    textRequest5.Farm = this.TestFarm(_n);
-                    break;
-                default:
-                    break;
-            }
+            
+            textRequest5.MillerRabin = this.TestMillerRabin(_n);
+            textRequest5.SoloveyStrassen = this.TestSoloveyStrassen(_n);
+            textRequest5.Farm = this.TestFarm(_n);
 
             return textRequest5;
         }
         public TextRequest5 Result_2(TextRequest5 textRequest5)
         {
+            BigInteger num; //если не удалочь конвертировать, будет значение num
+            bool isNum_n = BigInteger.TryParse(textRequest5.bit_number, out num);
+            if (!isNum_n || textRequest5.bit_number[0] == '-')
+            {
+                textRequest5.generated_number = "Вы ввели что-то неправильно";
+                return textRequest5;
+            }
+            BigInteger _n = BigInteger.Parse(textRequest5.bit_number);
+            if (_n < 2)
+            {
+                textRequest5.generated_number = "Вы ввели что-то неправильно";
+                return textRequest5;
+            }
+            
+            BigInteger result = 1;
+            BigInteger result_2 = 1;
+            for (BigInteger i = 0; i < _n - 1; i++)
+            {
+                result *= 2;
+                result_2 *= 2;
+            }
+            result_2 *= 2;
+            result_2 -= 1;
+
+            if (textRequest5.test_number == 1)
+            {
+                while (result < result_2)
+                {
+                    if (this.TestMillerRabin(result_2) == "Вероятно простое")
+                    {
+                        textRequest5.generated_number = Convert.ToString(result_2);
+                        break;
+                    }
+                    result_2 -= 2;
+                }
+            }
+            else if (textRequest5.test_number == 2)
+            {
+                while (result < result_2)
+                {
+                    if (this.TestSoloveyStrassen(result_2) == "Вероятно простое")
+                    {
+                        textRequest5.generated_number = Convert.ToString(result_2);
+                        break;
+                    }
+                    result_2 -= 2;
+                }
+            }
+            else if(textRequest5.test_number == 3)
+            {
+                while (result < result_2)
+                {
+                    if (this.TestFarm(result_2) == "Вероятно простое")
+                    {
+                        textRequest5.generated_number = Convert.ToString(result_2);
+                        break;
+                    }
+                    result_2 -= 2;
+                }
+            }
+            
             return textRequest5;
         }
     }
