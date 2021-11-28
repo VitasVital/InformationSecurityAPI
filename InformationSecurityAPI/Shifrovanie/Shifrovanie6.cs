@@ -168,6 +168,15 @@ namespace InformationSecurityAPI.Shifrovanie
             }
             
             string[] cryptogram_numbers = textRequest6.cryptogram.Split(',');
+            
+            BigInteger num; //если не удалочь конвертировать, будет значение num
+            bool isNum_d = BigInteger.TryParse(textRequest6.input_d, out num);
+            bool isNum_n = BigInteger.TryParse(textRequest6.input_n, out num);
+            if (!isNum_d || textRequest6.input_d[0] == '-' || !isNum_n || textRequest6.input_n[0] == '-')
+            {
+                textRequest6.result_2 = "Ввели что-то неправильно";
+                return textRequest6;
+            }
 
             BigInteger d = BigInteger.Parse(textRequest6.input_d);
             BigInteger n = BigInteger.Parse(textRequest6.input_n);
