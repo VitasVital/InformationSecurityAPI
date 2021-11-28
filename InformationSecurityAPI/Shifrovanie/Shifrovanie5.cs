@@ -32,7 +32,7 @@ namespace InformationSecurityAPI.Shifrovanie
         public BigInteger VozvedenieStepenPoModulu(BigInteger a, BigInteger alpha, BigInteger n)
         {
             //перевод alpha в двоичный вид
-            string binary_alpha = this.ConvertToBinaty(alpha);
+            string binary_alpha = ConvertToBinaty(alpha);
 
             List<BigInteger> number = new List<BigInteger>() { a };
             for (int i = 1; i < binary_alpha.Length; i++)
@@ -85,10 +85,42 @@ namespace InformationSecurityAPI.Shifrovanie
                 return b;
             }
         }
+        
+        public BigInteger Yacobi(BigInteger a, BigInteger b)
+        {
+            int r = 1;
+            while (a != 0)
+            {
+                int t = 0;
+                while ((a & 1) == 0)
+                {
+                    t++;
+                    a >>= 1;
+                }
+                if ((t & 1) !=0)
+                {
+                    BigInteger temp = b % 8;
+                    if (temp == 3 || temp == 5)
+                    {
+                        r = -r;
+                    }
+                }
+                BigInteger a4 = a % 4, b4 = b % 4;
+                if (a4 == 3 && b4 == 3)
+                {
+                    r = -r;
+                }
+                BigInteger c = a;
+                a = b % c;
+                b = c;
+            }
+            return r;
+        }
 
         private string TestMillerRabin(BigInteger _n)
         {
-            int k = 5; //количество раундов
+            double k = BigInteger.Log(_n);
+            
             if (_n == 2 || _n == 3)
             {
                 return "Вероятно простое";
@@ -109,7 +141,6 @@ namespace InformationSecurityAPI.Shifrovanie
 
             for (int i = 0; i < k; i++)
             {
-                // выберем случайное целое число a в отрезке [2, n − 2]
                 RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
 
                 byte[] _a = new byte[_n.ToByteArray().LongLength];
@@ -123,22 +154,18 @@ namespace InformationSecurityAPI.Shifrovanie
                 }
                 while (a < 2 || a >= _n - 2);
 
-                BigInteger x = this.VozvedenieStepenPoModulu(a, t, _n);
+                BigInteger x = VozvedenieStepenPoModulu(a, t, _n);
 
-                // если x == 1 или x == n − 1, то перейти на следующую итерацию цикла
                 if (x == 1 || x == _n - 1)
                     continue;
 
                 for (int r = 1; r < s; r++)
                 {
-                    // x ← x^2 mod n
-                    x = this.VozvedenieStepenPoModulu(x, 2, _n);
+                    x = VozvedenieStepenPoModulu(x, 2, _n);
 
-                    // если x == 1, то вернуть "составное"
                     if (x == 1)
                         return "Составное";
 
-                    // если x == n − 1, то перейти на следующую итерацию внешнего цикла
                     if (x == _n - 1)
                         break;
                 }
@@ -175,20 +202,27 @@ namespace InformationSecurityAPI.Shifrovanie
             }
             while (a < 2 || a >= _n - 2);
 
-            BigInteger res = this.VozvedenieStepenPoModulu(a, _n - 1, _n);
+            BigInteger res = VozvedenieStepenPoModulu(a, _n - 1, _n);
 
             if (res == 1)
             {
                 return "Вероятно простое";
             }
-            else
-            {
-                return "Составное";
-            }
+
+            return "Составное";
         }
         private string TestSoloveyStrassen(BigInteger _n)
         {
-            int k = 5; //количество раундов
+            double k = BigInteger.Log(_n); //количество раундов
+            
+            if (_n == 2 || _n == 3)
+            {
+                return "Вероятно простое";
+            }
+            if (_n % 2 == 0)
+            {
+                return "Составное";
+            }
 
             for (int i = 1; i < k; i++)
             {
@@ -206,14 +240,23 @@ namespace InformationSecurityAPI.Shifrovanie
                 }
                 while (a < 2 || a >= _n - 2);
 
-                if (this.NOD(a, _n) != 1)
+                BigInteger d = NOD(a, _n);
+
+                if (d > 1)
                 {
                     return "Составное";
                 }
+                
+                BigInteger vozvedenieStepenPoModulu = VozvedenieStepenPoModulu(a, (_n - 1) / 2, _n);
 
-                BigInteger vozvedenieStepenPoModulu = this.VozvedenieStepenPoModulu(a, (_n - 1) / 2, _n);
+                BigInteger yacobi = Yacobi(a, _n);
 
-                if (vozvedenieStepenPoModulu != 1 && vozvedenieStepenPoModulu != -1)
+                if (yacobi < 0)
+                {
+                    yacobi = _n - 1;
+                }
+
+                if (vozvedenieStepenPoModulu != yacobi || yacobi == 0)
                 {
                     return "Составное";
                 }
@@ -242,9 +285,9 @@ namespace InformationSecurityAPI.Shifrovanie
                 return textRequest5;
             }
             
-            textRequest5.MillerRabin = this.TestMillerRabin(_n);
-            textRequest5.SoloveyStrassen = this.TestSoloveyStrassen(_n);
-            textRequest5.Farm = this.TestFarm(_n);
+            textRequest5.MillerRabin = TestMillerRabin(_n);
+            textRequest5.SoloveyStrassen = TestSoloveyStrassen(_n);
+            textRequest5.Farm = TestFarm(_n);
 
             return textRequest5;
         }
