@@ -16,31 +16,29 @@ namespace InformationSecurityAPI.Controllers
         {
         }
         [HttpPost]
-        public JsonResult Post(TextRequest5 textRequest5)
+        public JsonResult Post(TextRequest6 textRequest6)
         {
-            if (textRequest5.number_result == 1)
+            if (textRequest6.number_result == 1)
             {
-                if (textRequest5.n == "")
+                if (textRequest6.bit_count == "" || textRequest6.input_text == "")
                 {
-                    textRequest5.MillerRabin = "Заполни n";
-                    textRequest5.Farm = "Заполни n";
-                    textRequest5.SoloveyStrassen = "Заполни n";
-                    return new JsonResult(textRequest5);
+                    textRequest6.result_1 = "Что-то не заполнено";
+                    return new JsonResult(textRequest6);
                 }
-                Shifrovanie5 shifr = new Shifrovanie5();
-                return new JsonResult(shifr.Result_1(textRequest5));
+                Shifrovanie6 shifr = new Shifrovanie6();
+                return new JsonResult(shifr.Result_1(textRequest6));
             }
-            if (textRequest5.number_result == 2)
+            if (textRequest6.number_result == 2)
             {
-                if (textRequest5.bit_number == "")
+                if (textRequest6.cryptogram == "" || textRequest6.input_d == "" || textRequest6.input_n == "")
                 {
-                    textRequest5.generated_number = "Что-то не заполнено";
-                    return new JsonResult(textRequest5);
+                    textRequest6.result_2 = "Что-то не заполнено";
+                    return new JsonResult(textRequest6);
                 }
-                Shifrovanie5 shifr = new Shifrovanie5();
-                return new JsonResult(shifr.Result_2(textRequest5));
+                Shifrovanie6 shifr = new Shifrovanie6();
+                return new JsonResult(shifr.Result_2(textRequest6));
             }
-            return new JsonResult(textRequest5);
+            return new JsonResult(textRequest6);
         }
     }
 }

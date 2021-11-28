@@ -116,8 +116,28 @@ namespace InformationSecurityAPI.Shifrovanie
             }
             return r;
         }
+        
+        public BigInteger BinPower(BigInteger x, BigInteger n)
+        {
+            BigInteger result = 1;
+            while (n > 0)
+            {
+                if ((n & 1) == 0)
+                {
+                    x *= x;
+                    n >>= 1;
+                }
+                else
+                {
+                    result *= x;
+                    --n;
+                }
+            }
 
-        private string TestMillerRabin(BigInteger _n)
+            return result;
+        } 
+
+        public string TestMillerRabin(BigInteger _n)
         {
             double k = BigInteger.Log(_n);
             
@@ -187,28 +207,33 @@ namespace InformationSecurityAPI.Shifrovanie
             {
                 return "Составное";
             }
-
-            // выберем случайное целое число a в отрезке [2, n − 2]
-            RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
-
-            byte[] _a = new byte[_n.ToByteArray().LongLength];
-
-            BigInteger a;
-
-            do
+            
+            double k = BigInteger.Log(_n);
+            
+            for (int i = 0; i < k; i++)
             {
-                rng.GetBytes(_a);
-                a = new BigInteger(_a);
+                // выберем случайное целое число a в отрезке [2, n − 2]
+                RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+
+                byte[] _a = new byte[_n.ToByteArray().LongLength];
+
+                BigInteger a;
+
+                do
+                {
+                    rng.GetBytes(_a);
+                    a = new BigInteger(_a);
+                }
+                while (a < 2 || a >= _n - 2);
+
+                BigInteger res = VozvedenieStepenPoModulu(a, _n - 1, _n);
+
+                if (res == 1)
+                {
+                    return "Вероятно простое";
+                }
             }
-            while (a < 2 || a >= _n - 2);
-
-            BigInteger res = VozvedenieStepenPoModulu(a, _n - 1, _n);
-
-            if (res == 1)
-            {
-                return "Вероятно простое";
-            }
-
+            
             return "Составное";
         }
         private string TestSoloveyStrassen(BigInteger _n)
@@ -307,21 +332,14 @@ namespace InformationSecurityAPI.Shifrovanie
                 return textRequest5;
             }
             
-            BigInteger result = 1;
-            BigInteger result_2 = 1;
-            for (BigInteger i = 0; i < _n - 1; i++)
-            {
-                result *= 2;
-                result_2 *= 2;
-            }
-            result_2 *= 2;
-            result_2 -= 1;
+            BigInteger result = BinPower(2, _n - 1);
+            BigInteger result_2 = result * 2 - 1;
 
             if (textRequest5.test_number == 1)
             {
                 while (result < result_2)
                 {
-                    if (this.TestMillerRabin(result_2) == "Вероятно простое")
+                    if (TestMillerRabin(result_2) == "Вероятно простое")
                     {
                         textRequest5.generated_number = Convert.ToString(result_2);
                         break;
@@ -333,7 +351,7 @@ namespace InformationSecurityAPI.Shifrovanie
             {
                 while (result < result_2)
                 {
-                    if (this.TestSoloveyStrassen(result_2) == "Вероятно простое")
+                    if (TestSoloveyStrassen(result_2) == "Вероятно простое")
                     {
                         textRequest5.generated_number = Convert.ToString(result_2);
                         break;
@@ -345,7 +363,7 @@ namespace InformationSecurityAPI.Shifrovanie
             {
                 while (result < result_2)
                 {
-                    if (this.TestFarm(result_2) == "Вероятно простое")
+                    if (TestFarm(result_2) == "Вероятно простое")
                     {
                         textRequest5.generated_number = Convert.ToString(result_2);
                         break;
