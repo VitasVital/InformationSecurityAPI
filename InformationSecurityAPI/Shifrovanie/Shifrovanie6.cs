@@ -35,34 +35,41 @@ namespace InformationSecurityAPI.Shifrovanie
         
         public BigInteger NOD(BigInteger a, BigInteger b)
         {
-            BigInteger p = 1, q = 0, r = 0, s = 1;
-            while (a > 0 && b > 0)
+            List<BigInteger[]> list = new List<BigInteger[]>();
+            list.Add(new BigInteger[6]);
+            list[0][0] = a;
+            list[0][1] = b;
+
+            list[0][2] = a % b;
+            list[0][3] = a / b;
+
+            int ind = 0;
+            while (list[ind][2] != 0)
             {
-                if (a >= b)
-                {
-                    a = a - b;
-                    p = p - r;
-                    q = q - s;
-                }
-                else
-                {
-                    b = b - a;
-                    r = r - p;
-                    s = s - q;
-                }
+                ind += 1;
+
+                list.Add(new BigInteger[6]);
+
+                list[ind][0] = list[ind - 1][1];
+                list[ind][1] = list[ind - 1][2];
+
+                list[ind][2] = list[ind][0] % list[ind][1];
+                list[ind][3] = list[ind][0] / list[ind][1];
             }
-            if (a > 0)
+
+            list[ind][4] = 0;
+            list[ind][5] = 1;
+            while (ind != 0)
             {
-                x = p;
-                y = q;
-                return a;
+                ind -= 1;
+
+                list[ind][4] = list[ind + 1][5];
+                list[ind][5] = list[ind + 1][4] - list[ind + 1][5] * list[ind][3];
             }
-            else
-            {
-                x = r;
-                y = s;
-                return b;
-            }
+
+            x = list[ind][4]; 
+            y = list[ind][5];
+            return x * a + y * b;
         }
 
         public TextRequest6 Result_1(TextRequest6 textRequest6)
@@ -90,8 +97,6 @@ namespace InformationSecurityAPI.Shifrovanie
                 return textRequest6;
             }
             
-            BigInteger result = shifr5.BinPower(2, _n) - 1;
-
             BigInteger p = 1;
             BigInteger q = 1;
             int num_p_q = 0;
@@ -105,6 +110,16 @@ namespace InformationSecurityAPI.Shifrovanie
             {
                 while (num_p_q < 2)
                 {
+                    var rng = new RNGCryptoServiceProvider();
+                    byte[] bytes = new byte[(int)_n / 8];
+                    rng.GetBytes(bytes);
+                    BigInteger result = new BigInteger(bytes);
+                    
+                    if (result < 0)
+                    {
+                        continue;
+                    }
+                    
                     if (shifr5.TestMillerRabin(result) == "Вероятно простое")
                     {
                         if (num_p_q == 0)
@@ -118,7 +133,6 @@ namespace InformationSecurityAPI.Shifrovanie
                             num_p_q += 1;
                         }
                     }
-                    result -= 2;
                 }
             }
             
@@ -128,14 +142,13 @@ namespace InformationSecurityAPI.Shifrovanie
 
             for (BigInteger i = 2; i < fi_n; i++)
             {
-                if (shifr5.NOD(i, fi_n) == 1)
+                if (NOD(fi_n,i) == 1)
                 {
                     e = i;
                     break;
                 }
             }
 
-            NOD(fi_n, e);
             BigInteger d = y;
 
             List<BigInteger> shifr_res = new List<BigInteger>();
@@ -185,13 +198,13 @@ namespace InformationSecurityAPI.Shifrovanie
             {
                 input_message_res.Add((int)shifr5.VozvedenieStepenPoModulu(BigInteger.Parse(cryptogram_numbers[i]), d, n));
             }
+            //
+            // for (int i = 0; i < input_message_res.Count; i++)
+            // {
+            //     textRequest6.result_2 += letter[input_message_res[i]];
+            // }
             
-            for (int i = 0; i < input_message_res.Count; i++)
-            {
-                textRequest6.result_2 += letter[input_message_res[i]];
-            }
-            
-            //textRequest6.result_2 = String.Join(",", input_message_res);
+            textRequest6.result_2 = String.Join(",", input_message_res);
             
             return textRequest6;
         }

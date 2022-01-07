@@ -89,36 +89,42 @@ namespace InformationSecurityAPI.Shifrovanie
             BigInteger a = BigInteger.Parse(textRequest4._A);
             BigInteger b = BigInteger.Parse(textRequest4._B);
 
-            BigInteger p = 1, q = 0, r = 0, s = 1, x, y;
-            while (a > 0 && b > 0)
+            List<BigInteger[]> list = new List<BigInteger[]>();
+            list.Add(new BigInteger[6]);
+            list[0][0] = a;
+            list[0][1] = b;
+
+            list[0][2] = a % b;
+            list[0][3] = a / b;
+
+            int ind = 0;
+            while (list[ind][2] != 0)
             {
-                if (a >= b)
-                {
-                    a = a - b;
-                    p = p - r;
-                    q = q - s;
-                }
-                else
-                {
-                    b = b - a;
-                    r = r - p;
-                    s = s - q;
-                }
+                ind += 1;
+
+                list.Add(new BigInteger[6]);
+
+                list[ind][0] = list[ind - 1][1];
+                list[ind][1] = list[ind - 1][2];
+
+                list[ind][2] = list[ind][0] % list[ind][1];
+                list[ind][3] = list[ind][0] / list[ind][1];
             }
-            if (a > 0)
+
+            list[ind][4] = 0;
+            list[ind][5] = 1;
+            while (ind != 0)
             {
-                x = p;
-                y = q;
-                textRequest4.result_2_nod = Convert.ToString(a);
+                ind -= 1;
+
+                list[ind][4] = list[ind + 1][5];
+                list[ind][5] = list[ind + 1][4] - list[ind + 1][5] * list[ind][3];
             }
-            else
-            {
-                x = r;
-                y = s;
-                textRequest4.result_2_nod = Convert.ToString(b);
-            }
+
+            BigInteger x = list[ind][4], y = list[ind][5];
             textRequest4.result_2_x = Convert.ToString(x);
             textRequest4.result_2_y = Convert.ToString(y);
+            textRequest4.result_2_nod = Convert.ToString(x * a + y * b);
 
             return textRequest4;
         }

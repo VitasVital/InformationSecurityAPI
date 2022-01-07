@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace InformationSecurityAPI.Shifrovanie
@@ -32,7 +33,7 @@ namespace InformationSecurityAPI.Shifrovanie
         public BigInteger VozvedenieStepenPoModulu(BigInteger a, BigInteger alpha, BigInteger n)
         {
             //перевод alpha в двоичный вид
-            string binary_alpha = ConvertToBinaty(alpha);
+            string binary_alpha = this.ConvertToBinaty(alpha);
 
             List<BigInteger> number = new List<BigInteger>() { a };
             for (int i = 1; i < binary_alpha.Length; i++)
@@ -48,44 +49,81 @@ namespace InformationSecurityAPI.Shifrovanie
                     result *= number[i];
                 }
             }
-
             result %= n;
 
             return result;
         }
 
+        //public BigInteger NOD(BigInteger a, BigInteger b)
+        //{
+        //    BigInteger p = 1, q = 0, r = 0, s = 1, x, y;
+        //    while (a > 0 && b > 0)
+        //    {
+        //        if (a >= b)
+        //        {
+        //            a = a - b;
+        //            p = p - r;
+        //            q = q - s;
+        //        }
+        //        else
+        //        {
+        //            b = b - a;
+        //            r = r - p;
+        //            s = s - q;
+        //        }
+        //    }
+        //    if (a > 0)
+        //    {
+        //        x = p;
+        //        y = q;
+        //        return a;
+        //    }
+        //    else
+        //    {
+        //        x = r;
+        //        y = s;
+        //        return b;
+        //    }
+        //}
+
         public BigInteger NOD(BigInteger a, BigInteger b)
         {
-            BigInteger p = 1, q = 0, r = 0, s = 1, x, y;
-            while (a > 0 && b > 0)
+            List<BigInteger[]> list = new List<BigInteger[]>();
+            list.Add(new BigInteger[6]);
+            list[0][0] = a;
+            list[0][1] = b;
+
+            list[0][2] = a % b;
+            list[0][3] = a / b;
+
+            int ind = 0;
+            while (list[ind][2] != 0)
             {
-                if (a >= b)
-                {
-                    a = a - b;
-                    p = p - r;
-                    q = q - s;
-                }
-                else
-                {
-                    b = b - a;
-                    r = r - p;
-                    s = s - q;
-                }
+                ind += 1;
+
+                list.Add(new BigInteger[6]);
+
+                list[ind][0] = list[ind - 1][1];
+                list[ind][1] = list[ind - 1][2];
+
+                list[ind][2] = list[ind][0] % list[ind][1];
+                list[ind][3] = list[ind][0] / list[ind][1];
             }
-            if (a > 0)
+
+            list[ind][4] = 0;
+            list[ind][5] = 1;
+            while (ind != 0)
             {
-                x = p;
-                y = q;
-                return a;
+                ind -= 1;
+
+                list[ind][4] = list[ind + 1][5];
+                list[ind][5] = list[ind + 1][4] - list[ind + 1][5] * list[ind][3];
             }
-            else
-            {
-                x = r;
-                y = s;
-                return b;
-            }
+
+            BigInteger x = list[ind][4], y = list[ind][5];
+            return x * a + y * b;
         }
-        
+
         public BigInteger Yacobi(BigInteger a, BigInteger b)
         {
             int r = 1;
@@ -117,26 +155,6 @@ namespace InformationSecurityAPI.Shifrovanie
             return r;
         }
         
-        public BigInteger BinPower(BigInteger x, BigInteger n)
-        {
-            BigInteger result = 1;
-            while (n > 0)
-            {
-                if ((n & 1) == 0)
-                {
-                    x *= x;
-                    n >>= 1;
-                }
-                else
-                {
-                    result *= x;
-                    --n;
-                }
-            }
-
-            return result;
-        } 
-
         public string TestMillerRabin(BigInteger _n)
         {
             double k = BigInteger.Log(_n);
@@ -197,7 +215,7 @@ namespace InformationSecurityAPI.Shifrovanie
             return "Вероятно простое";
         }
 
-        private string TestFarm(BigInteger _n)
+        public string TestFarm(BigInteger _n)
         {
             if (_n == 2 || _n == 3)
             {
@@ -208,35 +226,30 @@ namespace InformationSecurityAPI.Shifrovanie
                 return "Составное";
             }
             
-            double k = BigInteger.Log(_n);
-            
-            for (int i = 0; i < k; i++)
+            // выберем случайное целое число a в отрезке [2, n − 2]
+            RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+
+            byte[] _a = new byte[_n.ToByteArray().LongLength];
+
+            BigInteger a;
+
+            do
             {
-                // выберем случайное целое число a в отрезке [2, n − 2]
-                RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+                rng.GetBytes(_a);
+                a = new BigInteger(_a);
+            }
+            while (a < 2 || a >= _n - 2);
 
-                byte[] _a = new byte[_n.ToByteArray().LongLength];
+            BigInteger res = VozvedenieStepenPoModulu(a, _n - 1, _n);
 
-                BigInteger a;
-
-                do
-                {
-                    rng.GetBytes(_a);
-                    a = new BigInteger(_a);
-                }
-                while (a < 2 || a >= _n - 2);
-
-                BigInteger res = VozvedenieStepenPoModulu(a, _n - 1, _n);
-
-                if (res == 1)
-                {
-                    return "Вероятно простое";
-                }
+            if (res == 1)
+            {
+                return "Вероятно простое";
             }
             
             return "Составное";
         }
-        private string TestSoloveyStrassen(BigInteger _n)
+        public string TestSoloveyStrassen(BigInteger _n)
         {
             double k = BigInteger.Log(_n); //количество раундов
             
@@ -318,57 +331,79 @@ namespace InformationSecurityAPI.Shifrovanie
         }
         public TextRequest5 Result_2(TextRequest5 textRequest5)
         {
-            BigInteger num; //если не удалочь конвертировать, будет значение num
-            bool isNum_n = BigInteger.TryParse(textRequest5.bit_number, out num);
+            int num; //если не удалочь конвертировать, будет значение num
+            bool isNum_n = int.TryParse(textRequest5.bit_number, out num);
             if (!isNum_n || textRequest5.bit_number[0] == '-')
             {
                 textRequest5.generated_number = "Вы ввели что-то неправильно";
                 return textRequest5;
             }
-            BigInteger _n = BigInteger.Parse(textRequest5.bit_number);
+            int _n = int.Parse(textRequest5.bit_number);
             if (_n < 2)
             {
                 textRequest5.generated_number = "Вы ввели что-то неправильно";
                 return textRequest5;
             }
             
-            BigInteger result = BinPower(2, _n - 1);
-            BigInteger result_2 = result * 2 - 1;
 
             if (textRequest5.test_number == 1)
             {
-                while (result < result_2)
+                while (true)
                 {
-                    if (TestMillerRabin(result_2) == "Вероятно простое")
+                    var rng = new RNGCryptoServiceProvider();
+                    byte[] bytes = new byte[_n / 8];
+                    rng.GetBytes(bytes);
+                    BigInteger p = new BigInteger(bytes);
+                    if (p < 0)
                     {
-                        textRequest5.generated_number = Convert.ToString(result_2);
+                        continue;
+                    }
+                    
+                    if (TestMillerRabin(p) == "Вероятно простое")
+                    {
+                        textRequest5.generated_number = Convert.ToString(p);
                         break;
                     }
-                    result_2 -= 2;
                 }
             }
             else if (textRequest5.test_number == 2)
             {
-                while (result < result_2)
+                while (true)
                 {
-                    if (TestSoloveyStrassen(result_2) == "Вероятно простое")
+                    var rng = new RNGCryptoServiceProvider();
+                    byte[] bytes = new byte[_n / 8];
+                    rng.GetBytes(bytes);
+                    BigInteger p = new BigInteger(bytes);
+                    if (p < 0)
                     {
-                        textRequest5.generated_number = Convert.ToString(result_2);
+                        continue;
+                    }
+                    
+                    if (TestSoloveyStrassen(p) == "Вероятно простое")
+                    {
+                        textRequest5.generated_number = Convert.ToString(p);
                         break;
                     }
-                    result_2 -= 2;
                 }
             }
             else if(textRequest5.test_number == 3)
             {
-                while (result < result_2)
+                while (true)
                 {
-                    if (TestFarm(result_2) == "Вероятно простое")
+                    var rng = new RNGCryptoServiceProvider();
+                    byte[] bytes = new byte[_n / 8];
+                    rng.GetBytes(bytes);
+                    BigInteger p = new BigInteger(bytes);
+                    if (p < 0)
                     {
-                        textRequest5.generated_number = Convert.ToString(result_2);
+                        continue;
+                    }
+                    
+                    if (TestFarm(p) == "Вероятно простое")
+                    {
+                        textRequest5.generated_number = Convert.ToString(p);
                         break;
                     }
-                    result_2 -= 2;
                 }
             }
             
