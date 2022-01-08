@@ -152,6 +152,11 @@ namespace InformationSecurityAPI.Shifrovanie
             BigInteger d = y;
 
             List<BigInteger> shifr_res = new List<BigInteger>();
+            
+            while (d < 0)
+            {
+                d = fi_n + d;
+            }
 
             for (int i = 0; i < textRequest6.input_text.Length; i++)
             {
@@ -185,7 +190,7 @@ namespace InformationSecurityAPI.Shifrovanie
             BigInteger num; //если не удалочь конвертировать, будет значение num
             bool isNum_d = BigInteger.TryParse(textRequest6.input_d, out num);
             bool isNum_n = BigInteger.TryParse(textRequest6.input_n, out num);
-            if (!isNum_d || textRequest6.input_d[0] == '-' || !isNum_n || textRequest6.input_n[0] == '-')
+            if (!isNum_d || !isNum_n || textRequest6.input_n[0] == '-')
             {
                 textRequest6.result_2 = "Ввели что-то неправильно";
                 return textRequest6;
@@ -198,13 +203,14 @@ namespace InformationSecurityAPI.Shifrovanie
             {
                 input_message_res.Add((int)shifr5.VozvedenieStepenPoModulu(BigInteger.Parse(cryptogram_numbers[i]), d, n));
             }
-            //
-            // for (int i = 0; i < input_message_res.Count; i++)
-            // {
-            //     textRequest6.result_2 += letter[input_message_res[i]];
-            // }
-            
-            textRequest6.result_2 = String.Join(",", input_message_res);
+
+            textRequest6.result_2 = "";
+            for (int i = 0; i < input_message_res.Count; i++)
+            {
+                textRequest6.result_2 += letter[input_message_res[i]];
+            }
+
+            //textRequest6.result_2 = String.Join(",", input_message_res);
             
             return textRequest6;
         }
