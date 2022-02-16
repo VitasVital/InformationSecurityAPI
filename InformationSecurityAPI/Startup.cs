@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using InformationSecurityAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace InformationSecurityAPI
 {
@@ -28,6 +30,10 @@ namespace InformationSecurityAPI
             {
                 c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             });
+            
+            services.AddDbContext<CryptographyContext>(options => 
+                options.UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]));
+            
             services.AddControllers();
         }
 
