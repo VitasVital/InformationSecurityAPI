@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace InformationSecurityAPI.Shifrovanie
+namespace InformationSecurityAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -38,19 +38,11 @@ namespace InformationSecurityAPI.Shifrovanie
                 return new JsonResult("Данный пользователь уже зарегистрирован");
             }
             
-            using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
-            {
-                byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(client.Password);
-                byte[] hashBytes = md5.ComputeHash(inputBytes);
-
-                // Convert the byte array to hexadecimal string
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < hashBytes.Length; i++)
-                {
-                    sb.Append(hashBytes[i].ToString("X2"));
-                }
-                client.Password = sb.ToString();
-            }
+            var md5Hash = MD5.Create();
+            var sourceBytes = Encoding.UTF8.GetBytes(client.Password);
+            var hashBytes = md5Hash.ComputeHash(sourceBytes);
+            var hash = BitConverter.ToString(hashBytes).Replace("-", string.Empty);
+            client.Password = hash;
             
             _db.Users.Add(client);
             _db.SaveChanges();

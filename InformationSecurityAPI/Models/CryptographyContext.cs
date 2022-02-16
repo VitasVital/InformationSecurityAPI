@@ -18,6 +18,7 @@ namespace InformationSecurityAPI.Models
         }
 
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<UserSession> UserSessions { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -38,6 +39,28 @@ namespace InformationSecurityAPI.Models
 
                 entity.HasIndex(e => e.Id, "User_Id_uindex")
                     .IsUnique();
+
+                entity.Property(e => e.Login)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Password)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+            });
+
+            modelBuilder.Entity<UserSession>(entity =>
+            {
+                entity.ToTable("User_session");
+
+                entity.HasIndex(e => e.Id, "User_session_Id_uindex")
+                    .IsUnique();
+
+                entity.Property(e => e.DateLogin).HasColumnType("datetime");
+
+                entity.Property(e => e.IsDeleted).HasDefaultValueSql("((0))");
+
+                entity.Property(e => e.IsLogged).HasDefaultValueSql("((0))");
 
                 entity.Property(e => e.Login)
                     .HasMaxLength(50)
