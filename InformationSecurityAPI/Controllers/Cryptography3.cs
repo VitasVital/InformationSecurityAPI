@@ -17,11 +17,11 @@ namespace InformationSecurityAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class Cryptography2 : Controller
+    public class Cryptography3 : Controller
     {
         public CryptographyContext _db;
 
-        public Cryptography2(CryptographyContext context)
+        public Cryptography3(CryptographyContext context)
         {
             _db = context;
         }
@@ -64,36 +64,6 @@ namespace InformationSecurityAPI.Controllers
             _db.UserSessions.Add(client);
             _db.SaveChanges();
             return new JsonResult(hash_time);
-        }
-        
-        [HttpPost]
-        [Route("[action]")]
-        public JsonResult PostSecond(UserSession client)
-        {
-            UserSession client_old = _db
-                .UserSessions
-                .FirstOrDefault(c => c.Login == client.Login && c.Password == client.Password && c.IsDeleted == false);
-
-            if (client_old is null)
-            {
-                return new JsonResult("Авторизация не удалась");
-            }
-            
-            if (client_old.IsLogged == true && client_old.DateLogin < DateTime.Now)
-            {
-                client_old.IsDeleted = true;
-                _db.SaveChanges();
-                return new JsonResult("Время авторизации вышло");
-            }
-            
-            if (client_old.IsLogged == true && client_old.DateLogin > DateTime.Now)
-            {
-                return new JsonResult("Вы уже были авторизованы");
-            }
-
-            client_old.IsLogged = true;
-            _db.SaveChanges();
-            return new JsonResult("Успешная авторизация");
         }
         
         [Route("[action]/{sentText}")]
