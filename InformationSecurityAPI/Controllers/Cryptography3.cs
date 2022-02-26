@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using InformationSecurityAPI.Shifrovanie;
 using Microsoft.EntityFrameworkCore;
 
 namespace InformationSecurityAPI.Controllers
@@ -19,62 +20,67 @@ namespace InformationSecurityAPI.Controllers
     [ApiController]
     public class Cryptography3 : Controller
     {
-        public CryptographyContext _db;
-
-        public Cryptography3(CryptographyContext context)
+        private Shifrovanie5 shifrovanie5;
+        public Cryptography3()
         {
-            _db = context;
+            shifrovanie5 = new Shifrovanie5();
+        }
+
+        public BigInteger GenerateNumber(int bitCount)
+        {
+            while (true)
+            {
+                var rng = new RNGCryptoServiceProvider();
+                byte[] bytes = new byte[bitCount / 8];
+                rng.GetBytes(bytes);
+                BigInteger p = new BigInteger(bytes);
+                if (p < 0)
+                {
+                    continue;
+                }
+
+                if (shifrovanie5.TestSoloveyStrassen(p) == "Вероятно простое")
+                {
+                    return p;
+                }
+            }
+        }
+        
+        [Route("[action]")]
+        [HttpGet]
+        public IActionResult GetA()
+        {
+            BigInteger a = GenerateNumber(64);
+            BigInteger g = GenerateNumber(64);
+            BigInteger p = GenerateNumber(512);
+            BigInteger A = shifrovanie5.VozvedenieStepenPoModulu(g, a, p);
+            var response = new { mainA = A.ToString(), g = g.ToString(), p = p.ToString(), a = a.ToString() };
+            return Json(response);
         }
         
         [HttpPost]
         [Route("[action]")]
-        public JsonResult PostFirst(UserSession client)
+        public IActionResult GetB(CryptographyModel3 res)
         {
-            User client_password = _db
-                .Users
-                .FirstOrDefault(c => c.Login == client.Login);
-            
-            if (client_password is null)
-            {
-                return new JsonResult("Данный пользователь не зарегистрирован");
-            }
-            
-            UserSession client_old = _db
-                .UserSessions
-                .FirstOrDefault(c => c.Login == client.Login && c.Password == client.Password && c.IsLogged == true && c.IsDeleted == false);
-
-            if (client_old is null == false)
-            {
-                return new JsonResult("Вы уже авторизованы");
-            }
-
-            DateTime now = DateTime.Now.AddDays(7);
-            var md5Hash = MD5.Create();
-            var sourceBytes = Encoding.UTF8.GetBytes(now.ToString());
-            var hashBytes = md5Hash.ComputeHash(sourceBytes);
-            var hash_time = BitConverter.ToString(hashBytes).Replace("-", string.Empty);
-            
-            sourceBytes = Encoding.UTF8.GetBytes(hash_time + client_password.Password);
-            hashBytes = md5Hash.ComputeHash(sourceBytes);
-            var hash_result = BitConverter.ToString(hashBytes).Replace("-", string.Empty);
-            
-            client.Password = hash_result;
-            client.DateLogin = now;
-            
-            _db.UserSessions.Add(client);
-            _db.SaveChanges();
-            return new JsonResult(hash_time);
+            BigInteger b = GenerateNumber(64);
+            BigInteger bigint_A = BigInteger.Parse(res.A);
+            BigInteger bigint_g = BigInteger.Parse(res.g);
+            BigInteger bigint_p = BigInteger.Parse(res.p);
+            BigInteger B = shifrovanie5.VozvedenieStepenPoModulu(bigint_g, b, bigint_p);
+            var response = new { mainB = B.ToString(), b = b.ToString() };
+            return Json(response);
         }
         
-        [Route("[action]/{sentText}")]
-        [HttpGet]
-        public string GetHashText(string sentText)
+        [HttpPost]
+        [Route("[action]")]
+        public IActionResult GetK(CryptographyModel3 res)
         {
-            var md5Hash = MD5.Create();
-            var sourceBytes = Encoding.UTF8.GetBytes(sentText);
-            var hashBytes = md5Hash.ComputeHash(sourceBytes);
-            string hash = BitConverter.ToString(hashBytes).Replace("-", string.Empty);
-            return hash;
+            BigInteger bigint_A = BigInteger.Parse(res.A);
+            BigInteger bigint_g = BigInteger.Parse(res.g);
+            BigInteger bigint_p = BigInteger.Parse(res.p);
+            BigInteger K = shifrovanie5.VozvedenieStepenPoModulu(bigint_A, bigint_g, bigint_p);
+            var response = new { K = K.ToString() };
+            return Json(response);
         }
     }
 }

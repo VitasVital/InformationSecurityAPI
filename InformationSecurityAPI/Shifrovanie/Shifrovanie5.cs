@@ -54,38 +54,6 @@ namespace InformationSecurityAPI.Shifrovanie
             return result;
         }
 
-        //public BigInteger NOD(BigInteger a, BigInteger b)
-        //{
-        //    BigInteger p = 1, q = 0, r = 0, s = 1, x, y;
-        //    while (a > 0 && b > 0)
-        //    {
-        //        if (a >= b)
-        //        {
-        //            a = a - b;
-        //            p = p - r;
-        //            q = q - s;
-        //        }
-        //        else
-        //        {
-        //            b = b - a;
-        //            r = r - p;
-        //            s = s - q;
-        //        }
-        //    }
-        //    if (a > 0)
-        //    {
-        //        x = p;
-        //        y = q;
-        //        return a;
-        //    }
-        //    else
-        //    {
-        //        x = r;
-        //        y = s;
-        //        return b;
-        //    }
-        //}
-
         public BigInteger NOD(BigInteger a, BigInteger b)
         {
             List<BigInteger[]> list = new List<BigInteger[]>();
