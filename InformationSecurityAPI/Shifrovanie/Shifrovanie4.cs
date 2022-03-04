@@ -14,7 +14,7 @@ namespace InformationSecurityAPI.Shifrovanie
         public Shifrovanie4()
         {
         }
-        private string ConvertToBinaty(BigInteger number)
+        public string ConvertToBinaty(BigInteger number)
         {
             string binary_letter = "";
             if (number == 0)
@@ -52,7 +52,7 @@ namespace InformationSecurityAPI.Shifrovanie
             }
 
             //перевод alpha в двоичный вид
-            string binary_alpha = this.ConvertToBinaty(_alpha);
+            string binary_alpha = ConvertToBinaty(_alpha);
 
             List<BigInteger> number = new List<BigInteger>() { _a };
             for (int i = 1; i < binary_alpha.Length; i++)

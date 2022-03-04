@@ -270,6 +270,54 @@ namespace InformationSecurityAPI.Shifrovanie
 
             return "Вероятно простое";
         }
+        
+        public BigInteger ro_Pollard(BigInteger n)
+        {
+            BigInteger x = 4;
+            BigInteger y = 1;
+            BigInteger i = 0;
+            BigInteger stage = 2;
+
+            while (BigInteger.GreatestCommonDivisor(n, BigInteger.Abs(x - y)) == 1)
+            {
+                if (i == stage)
+                {
+                    y = x;
+                    stage = stage * 2;
+                }
+                x = (x * x - 1) % n;
+                i = i + 1;
+            }
+            return BigInteger.GreatestCommonDivisor(n, BigInteger.Abs(x - y));
+        }
+        
+        public string TestPocklington(BigInteger _n)
+        {
+            if (_n == 2 || _n == 3)
+            {
+                return "Вероятно простое";
+            }
+            if (_n % 2 == 0)
+            {
+                return "Составное";
+            }
+            
+            BigInteger a = 2;
+            
+            BigInteger vozvedenieStepenPoModulu = VozvedenieStepenPoModulu(a, _n - 1 , _n);
+            if (vozvedenieStepenPoModulu != 1)
+            {
+                return "Составное";
+            }
+            
+            BigInteger q = ro_Pollard(_n - 1);
+            BigInteger p = BigInteger.GreatestCommonDivisor(_n, BigInteger.Pow(a,   (int)(q - 1)));
+            if (p != 1)
+            {
+                return "Составное";
+            }
+            return "Вероятно простое";
+        }
 
         public TextRequest5 Result_1(TextRequest5 textRequest5)
         {
