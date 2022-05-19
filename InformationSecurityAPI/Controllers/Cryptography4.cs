@@ -31,7 +31,6 @@ namespace InformationSecurityAPI.Controllers
             byte[] key = ASCIIEncoding.ASCII.GetBytes(res.K);
 
             RC4 encoder = new RC4(key);
-            // string testString = res.Message;
             byte[] testBytes = ASCIIEncoding.ASCII.GetBytes(res.Message);
             byte[] result = encoder.Encode(testBytes, testBytes.Length);
 
